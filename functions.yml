@@ -1,0 +1,21 @@
+checkUsersCreated:
+  handler: src/handler.cronTemplate
+  role: cronTemplateRole
+  timeout: 900
+  environment:
+    DATABASE_CONN_SECRET: ${self:custom.secretManager.databaseConn}
+    REDIS_USERS_HOST: ${self:custom.app.redisUsersHost}
+    KEEP_ALIVE_MAX_SOCKETS: ${self:custom.keepAlive.maxSockets}
+    KEEP_ALIVE_MAX_FREE_SOCKETS: ${self:custom.keepAlive.maxFreeSockets}
+    KEEP_ALIVE_TIMEOUT: ${self:custom.keepAlive.aliveTimeout}
+    KEEP_ALIVE_FREE_SOCKET_TIMEOUT: ${self:custom.keepAlive.aliveFreeSocketTimeout}
+    IS_REPLICA_DATABASE: ${self:custom.app.isReplicaDatabase}
+    TIMEZONE: ${self:custom.app.timezone}
+  vpc:
+    securityGroupIds:
+      - ${self:custom.network.securityGroupId}
+    subnetIds:
+      - ${self:custom.network.subnet1Id}
+      - ${self:custom.network.subnet2Id}
+  events:
+    - schedule: cron(${self:custom.app.cronTemplateExpression})

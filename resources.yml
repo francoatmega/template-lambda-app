@@ -1,0 +1,38 @@
+Resources:
+  # Roles
+  cronTemplateRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /tempalte-lambda-app/api/roles/
+      RoleName: cronTemplateRole-${self:custom.projectConfig.stage}
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: cronTemplateRolePolicy
+          PolicyDocument:
+            Statement:
+              # Logs
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+              # SecretManager
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - arn:aws:secretsmanager:*:*:secret:*
+              # Network
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                Resource: '*'

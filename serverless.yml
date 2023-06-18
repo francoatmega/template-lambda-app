@@ -1,0 +1,72 @@
+service: template-lambda-app
+
+useDotenv: true
+
+custom:
+  prune:
+    automatic: true
+    number: 3
+  app:
+    redisUsersHost: ${env:REDIS_USERS_HOST}
+    cronTemplateExpression: ${env:CRON_TEMPLATE_EXPRESSION}
+    enableCronTemplate: ${env:ENABLE_CRON_TEMPLATE}
+    initialDate: ${env:INITIAL_DATE}
+    finalDate: ${env:FINAL_DATE}
+    workerId: ${env:WORKER_ID}
+    batchSize: ${env:BATCH_SIZE}
+    isReplicaDatabase: ${env:IS_REPLICA_DATABASE}
+    timezone: ${env:TIMEZONE}
+  network:
+    securityGroupId: ${env:SECURITYGROUPID}
+    subnet1Id: ${env:SUBNET1ID}
+    subnet2Id: ${env:SUBNET2ID}
+  cloudWatch:
+    retentionDays: ${env:RETENTION_DAYS}
+  keepAlive:
+    maxSockets: ${env:KEEP_ALIVE_MAX_SOCKETS}
+    maxFreeSockets: ${env:KEEP_ALIVE_MAX_FREE_SOCKETS}
+    aliveTimeout: ${env:KEEP_ALIVE_TIMEOUT}
+    aliveFreeSocketTimeout: ${env:KEEP_ALIVE_FREE_SOCKET_TIMEOUT}
+  projectConfig:
+    name: template-lambda-app
+    stage: ${env:STAGE}
+    region: ${env:AWS_REGION}
+    memorySize: ${env:MEMORY_SIZE}
+    timeout: ${env:TIMEOUT}
+  tags:
+    product: 'template-lambda-app'
+    serviceProvided: 'lambda'
+  secretManager:
+    databaseConn: ${self:custom.projectConfig.stage}/template-lambda-app/database-conn
+  logRetentionInDays: ${env:RETENTION_DAYS}
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: ${self:custom.projectConfig.stage}
+  region: ${self:custom.projectConfig.region}
+  memorySize: ${self:custom.projectConfig.memorySize}
+  timeout: ${self:custom.projectConfig.timeout}
+  environment:
+    NODE_ENV: ${self:custom.projectConfig.stage}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  stackTags:
+    Product: ${self:custom.tags.product}
+    Service-Provided: ${self:custom.tags.serviceProvided}
+
+package:
+  excludeDevDependencies: true
+
+functions:
+  - ${file(functions.yml)}
+
+resources:
+  - ${file(resources.yml)}
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-plugin-resource-tagging
+  - serverless-plugin-log-retention
+  - serverless-newrelic-lambda-layers
